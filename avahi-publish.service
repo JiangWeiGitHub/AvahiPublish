@@ -1,11 +1,11 @@
- [Unit]
+[Unit]
 Description=Avahi Publish Server
 After=network.target avahi-daemon.socket
 
 [Service]
 Type=notify
 ExecStart=/bin/node /usr/local/sbin/avahi-publish.js
-TimeoutStartSec=0
+TimeoutStartSec=3
 Restart=always
 
 [Install]
