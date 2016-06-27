@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 
 var sys = require('util');
@@ -11,7 +12,6 @@ var macNameArrayString = '';
 
 function saveInterfaceNameToArray(element){
   if(element.indexOf('->') > -1){
-
     if(element.indexOf('virtual') > -1){
 
     }
@@ -30,8 +30,13 @@ function saveMACNameToArray(element){
   arrayMACName.push(tmpOneLine[0]);
 }
 
-function constructMACNameArrayString(element){
-  macNameArrayString = "Mac=" + element + ' ';
+function constructMACNameArrayString(element, index, array){
+  if(array.length > 1){
+    macNameArrayString += "Mac" + (parseInt(index)+1) + "=" + element + ' ';
+  }
+  else{
+    macNameArrayString += "Mac=" + element + ' ';
+  }
 }
 
 function constructAvahiString(platformValue, macNameArrayString){
@@ -42,8 +47,9 @@ var platformCMD = exec("uname -i");
 var platformValue = platformCMD.toString().replace(/\r|\n|\r\n/g,"");
 
 var child = exec('ls -l /sys/class/net/');
-var hello = child.toString().split('\n');
-hello.forEach(saveInterfaceNameToArray);
+var allInterface = child.toString().split('\n');
+
+allInterface.forEach(saveInterfaceNameToArray);
 arrayInterfaceName.forEach(saveMACNameToArray);
 arrayMACName.forEach(constructMACNameArrayString);
 
