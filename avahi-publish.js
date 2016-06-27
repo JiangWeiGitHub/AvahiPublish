@@ -3,14 +3,51 @@
 var sys = require('util');
 var exec = require('child_process').execSync;
 
-var platform_cmd = exec("uname -i");
-var platform_value = platform_cmd.toString().replace(/\r|\n|\r\n/g,"");
+var platformValue = '';
+var arrayMACName = new Array();
+var arrayInterfaceName = new Array();
+var avahiString = '';
+var macNameArrayString = '';
 
-var mac_cmd = exec("cat /sys/class/net/enp2s0/address");
-var mac_value = mac_cmd.toString().replace(/\r|\n|\r\n/g,"");
+function saveInterfaceNameToArray(element){
+  if(element.indexOf('->') > -1){
 
-var result = "avahi-publish-service 'Wisnuc AppStation' _http._tcp 6666 Model=" + platform_value + " Mac=" +  mac_value + "&";
+    if(element.indexOf('virtual') > -1){
 
-console.log('result: ' + result);
+    }
+    else
+    {
+      var tmp = element.split('/');
+      arrayInterfaceName.push(tmp[tmp.length - 1]);
+    }
+  }
+}
 
-var avahi_cmd = exec(result);
+function saveMACNameToArray(element){
+  var tmpString = 'cat /sys/class/net/' + element  + '/address';
+  var tmp = exec(tmpString);
+  var tmpOneLine = tmp.toString().split('\n');
+  arrayMACName.push(tmpOneLine[0]);
+}
+
+function constructMACNameArrayString(element){
+  macNameArrayString = "Mac=" + element + ' ';
+}
+
+function constructAvahiString(platformValue, macNameArrayString){
+  avahiString = "avahi-publish-service 'Wisnuc AppStation' _http._tcp 6666 Model=" + platformValue + ' ' + macNameArrayString + "&";
+}
+
+var platformCMD = exec("uname -i");
+var platformValue = platformCMD.toString().replace(/\r|\n|\r\n/g,"");
+
+var child = exec('ls -l /sys/class/net/');
+var hello = child.toString().split('\n');
+hello.forEach(saveInterfaceNameToArray);
+arrayInterfaceName.forEach(saveMACNameToArray);
+arrayMACName.forEach(constructMACNameArrayString);
+
+constructAvahiString(platformValue, macNameArrayString);
+console.log('result: ' + avahiString);
+
+var avahiCMD = exec(avahiString);
